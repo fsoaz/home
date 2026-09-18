@@ -105,5 +105,5 @@ The repository’s Pages source must be set to **GitHub Actions**.
 
 ## Contact
 
-- Email: [fmsoaz@gmail.com](mailto:fmsoaz@gmail.com)
+- Contact: [Send a message](https://fsoaz.github.io/home/#contact)
 - GitHub: [@fsoaz](https://github.com/fsoaz)

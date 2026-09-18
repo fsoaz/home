@@ -84,5 +84,5 @@ export function BlackHole() {
     return()=>{observer.disconnect();removeEventListener("resize",resize);removeEventListener("pointermove",pointer);removeEventListener("scroll",updateScroll);cancelAnimationFrame(frame);gl.deleteShader(vertex);gl.deleteShader(fragment);gl.deleteProgram(program);gl.deleteBuffer(buffer);};
   }, []);
 
-  return <div ref={host} className={`black-hole ${ready ? "is-ready" : ""}`} aria-hidden="true"><div className="black-hole-fallback"/><canvas ref={canvas}/><div className="orbit-label">FM <span>/</span> EVENT HORIZON</div></div>;
+  return <div ref={host} className={`black-hole ${ready ? "is-ready" : ""}`} aria-hidden="true"><div className="black-hole-fallback"/><canvas ref={canvas}/></div>;
 }

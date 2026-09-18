@@ -49,6 +49,7 @@ export const copy = {
     expertiseLabel: "Expertise", expertiseTitle: "Across the full path from idea to working product.",
     workLabel: "Selected work", workTitle: "Systems built around real problems.", problem: "Problem", approach: "Approach", source: "View repository",
     contactLabel: "Contact", contactTitle: "Have a hard problem worth solving?", contactBody: "I’m open to backend, AI, and product engineering opportunities. Tell me what you’re building and where it gets difficult.", location: "Brazil · Available remotely", sayHello: "Say hello",
+    formName: "Name", formEmail: "Your email", formMessage: "Message", formSubmit: "Send message",
     menuOpen: "Open menu", menuClose: "Close menu", language: "Mudar para português", skip: "Skip to content",
   },
   "pt-BR": {
@@ -63,6 +64,7 @@ export const copy = {
     expertiseLabel: "Expertise", expertiseTitle: "Por todo o caminho, da ideia ao produto funcionando.",
     workLabel: "Projetos selecionados", workTitle: "Sistemas construídos em torno de problemas reais.", problem: "Problema", approach: "Abordagem", source: "Ver repositório",
     contactLabel: "Contato", contactTitle: "Tem um problema difícil que vale resolver?", contactBody: "Estou aberto a oportunidades em backend, IA e engenharia de produto. Conte o que você está construindo e onde está a dificuldade.", location: "Brasil · Disponível remotamente", sayHello: "Diga olá",
+    formName: "Nome", formEmail: "Seu email", formMessage: "Mensagem", formSubmit: "Enviar mensagem",
     menuOpen: "Abrir menu", menuClose: "Fechar menu", language: "Switch to English", skip: "Pular para o conteúdo",
   },
 } as const;
