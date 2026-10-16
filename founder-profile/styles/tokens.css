@@ -1,0 +1,85 @@
+:root {
+  color-scheme: dark;
+  --black: #050505;
+  --surface: #0a0a09;
+  --white: #f3f1ea;
+  --muted: #98958b;
+  --line: #ffffff1f;
+  --line-strong: #ffffff33;
+  --line-input: #ffffff66;
+  --gold: #d0a83f;
+  --gold-light: #f0d276;
+
+  --serif: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  /* Section headings stay at about 60–75% of the hero headline at every width. */
+  --text-display-1: clamp(3.6rem, 6.5vw, 7.8rem);
+  --text-display-2: clamp(2.75rem, 4.2vw, 4.75rem);
+  --text-h3: clamp(1.5rem, 2.4vw, 2.25rem);
+  --text-body: clamp(1rem, 1.5vw, 1.25rem);
+  --text-label: 0.75rem;
+  /* Loose enough for the system serif fallbacks on Windows, Linux, and Android. */
+  --tracking-display: -0.03em;
+  --tracking-label: 0.1em;
+  --leading-display: 1.02;
+  --leading-heading: 1.25;
+  --leading-body: 1.6;
+  --leading-label: 1.4;
+
+  --gutter: clamp(1.25rem, 7vw, 8rem);
+  --text-measure: 46rem;
+  --tap-target: 44px;
+  --hero-padding-top: var(--space-medium);
+  /* The header overlays the hero; content below it reserves one row of tap targets, two on phones. */
+  --header-height: var(--tap-target);
+  --hero-content-top: clamp(20rem, 42svh, 34rem);
+  --hole-width: 140vw;
+  --hole-left: 64%;
+  --hole-top: clamp(15rem, 31svh, 25rem);
+  --hero-description-color: #b5b1a6;
+  --hero-veil: #050505cc;
+  --hero-entrance: .75s;
+  --hero-copy-delay: .12s;
+  --hero-entrance-offset: .65rem;
+  --hero-header-shade: 9rem;
+  --hero-fade-height: 12rem;
+  --space-xsmall: 0.5rem;
+  --space-small: 1rem;
+  --space-medium: 2rem;
+  --space-large: 4rem;
+
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-standard: cubic-bezier(.4, 0, .2, 1);
+  --duration-fast: .18s;
+}
+
+@media (max-width: 960px) {
+  :root {
+    --gutter: clamp(1.25rem, 5.5vw, 3.5rem);
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --header-height: calc(2 * var(--tap-target));
+  }
+}
+
+@media (max-width: 800px) {
+  :root {
+    --text-display-1: clamp(2.65rem, 7.6vw, 4.6rem);
+    --text-display-2: clamp(2rem, 5.5vw, 3rem);
+    --hole-width: 200vw;
+    --hole-left: 61%;
+    --hole-top: clamp(12rem, 34vw, 19rem);
+    --hero-content-top: clamp(19rem, 53vw, 29rem);
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --hero-padding-top: var(--space-small);
+  }
+}
