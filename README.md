@@ -1,109 +1,47 @@
-# Francisco Micael — Portfolio
+# Francisco Micael — founder portfolio
 
-Personal portfolio for Francisco Micael, a Backend & AI Engineer based in Brazil.
+The main website for Francisco Micael, founder of Black Hole Company. The founder portfolio replaces the previous engineering portfolio in this repository's root application.
 
-**Live site:** [fsoaz.github.io/home](https://fsoaz.github.io/home/)
+Live address: https://fsoaz.github.io/home/ (updated by the existing deployment workflow after a push to `main`). This local change does not itself publish the site.
 
-## Overview
+## Development
 
-The site presents selected engineering work through a cinematic black-and-gold interface. A custom WebGL shader renders the hero’s central black hole, including gravitational ray bending, an accretion disk, photon-ring behavior, Doppler beaming, mouse parallax, and scroll-driven camera movement.
+Requires Node.js 22+ and npm.
 
-The portfolio is fully static and does not fetch GitHub data or expose API routes at runtime.
-
-### Features
-
-- English and Brazilian Portuguese content
-- Browser-language detection and persisted locale preference
-- Responsive, keyboard-accessible navigation
-- Project case studies with local imagery and repository links
-- Adaptive WebGL quality with offscreen pausing
-- Reduced-motion, low-power, and unsupported-WebGL fallbacks
-- Static metadata, Open Graph image, sitemap, and robots file
-- Automated deployment to GitHub Pages
-
-## Technology
-
-- Next.js 16 with the App Router
-- React 19 and TypeScript
-- Raw WebGL and GLSL
-- Plain CSS
-- ESLint
-
-## Local development
-
-Requirements:
-
-- Node.js 22 or later
-- npm
-
-Install dependencies and start the development server:
-
-```bash
-npm install
+```sh
+npm ci
 npm run dev
 ```
 
-Because the project uses the `/home` base path, open:
+Open http://localhost:3000/home/ for Portuguese or http://localhost:3000/home/en/ for English. `/home` is the GitHub Pages base path.
 
-```text
-http://localhost:3000/home/
+## Checks and production
+
+```sh
+npm run check
+npm run build
 ```
 
-Opening `http://localhost:3000/` directly returns a 404 by design.
+`check` runs route type generation, strict TypeScript and ESLint. `build` generates a static site in `out/`. The existing `.github/workflows/deploy.yml` installs, checks, builds and deploys that directory on pushes to `main`. No application server or `next start` is required for static hosting.
 
-## Available commands
+To preview the export with the same base path:
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Start the local development server |
-| `npm run typecheck` | Run TypeScript without emitting files |
-| `npm run lint` | Run ESLint |
-| `npm run check` | Run type checking and linting |
-| `npm run build` | Create the production static export |
-
-The production export is written to `out/`.
-
-## Project structure
-
-```text
-app/
-  content.ts       Typed bilingual content and project data
-  globals.css      Visual system and responsive layout
-  layout.tsx       Metadata and document shell
-  page.tsx         Main route
-components/
-  BlackHole.tsx    WebGL renderer and GLSL shader
-  Mark.tsx         FM orbital identity mark
-  Portfolio.tsx    Page sections and client interactions
-public/
-  projects/        Local project artwork
-.github/workflows/
-  deploy.yml       GitHub Pages build and deployment
+```sh
+mkdir -p /tmp/founder-preview
+ln -sfn "$PWD/out" /tmp/founder-preview/home
+python3 -m http.server 3107 --directory /tmp/founder-preview
 ```
 
-Portfolio copy, capabilities, project descriptions, and repository links are centralized in [`app/content.ts`](app/content.ts). Contact links and the page composition live in [`components/Portfolio.tsx`](components/Portfolio.tsx).
+Open http://localhost:3107/home/.
 
-## Static export and deployment
+## Editing
 
-The Next.js configuration uses:
+- `content/home.ts`: typed Portuguese and English content and links.
+- `components/Profile.tsx` and its CSS Module: founder page and existing contact form.
+- `components/ui/` and `styles/tokens.css`: adapted Black Hole Company components and design tokens.
+- `app/(pt)/` and `app/en/`: static pages with localized document languages and metadata.
+- `public/francisco-micael.png`: GitHub profile avatar, downloaded at the user's request. The profile currently uses a geometric identicon, not a photograph.
 
-- `output: "export"`
-- `basePath: "/home"`
-- `assetPrefix: "/home"`
-- trailing slashes
-- unoptimized local images for static hosting
+The contact form preserves the previous portfolio's Formspree endpoint and native browser validation. Submissions navigate to Formspree's response page. No new contact service was created. The upcoming product exposes only its name and a localized “Coming soon” label.
 
-Pushes to `main` trigger the GitHub Actions workflow, which:
-
-1. Installs dependencies with `npm ci`.
-2. Runs TypeScript and ESLint checks.
-3. Builds the static export.
-4. Adds `out/.nojekyll`.
-5. Uploads and deploys the GitHub Pages artifact.
-
-The repository’s Pages source must be set to **GitHub Actions**.
-
-## Contact
-
-- Contact: [Send a message](https://fsoaz.github.io/home/#contact)
-- GitHub: [@fsoaz](https://github.com/fsoaz)
+Locale links retain the section being read with JavaScript and remain ordinary navigation links without it. Reduced motion, visible keyboard focus, a skip link, and responsive layouts are included. The former separate `founder-profile/` draft has been integrated and removed.

@@ -41,3 +41,11 @@
   .hero h1 { font-size: clamp(3.6rem, 13vw, 6rem); }
   .empty { padding-top: 0; }
 }
+
+.form { display: grid; gap: 1.5rem; margin-top: 2rem; scroll-margin-top: 8rem; }
+.form label { display: grid; gap: .6rem; color: var(--muted); font: var(--text-label)/1.4 var(--mono); }
+.form input, .form textarea { width: 100%; min-width: 0; border: 1px solid var(--line-input); background: var(--surface); color: var(--white); font: 1rem/1.6 var(--sans); padding: .75rem; border-radius: 0; }
+.form textarea { resize: vertical; }
+.form button { justify-self: start; min-height: 44px; border: 1px solid var(--gold); padding: 1rem 2rem; background: transparent; color: var(--white); cursor: pointer; font: var(--text-label)/1.4 var(--mono); }
+.form button:hover { background: var(--gold-light); color: var(--black); }
+.form .honeypot { display: none; }

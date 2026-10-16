@@ -3,7 +3,7 @@ export type Locale = (typeof locales)[number];
 export const localePath = (locale: Locale) => locale === "pt-BR" ? "/" : "/en";
 export const links = {
   company: "https://blackholeco.com.br",
-  contact: "https://fsoaz.github.io/home/#contact",
+  contact: "#contact-form",
   github: "https://github.com/fsoaz",
 };
 
@@ -13,6 +13,7 @@ type Copy = {
   portraitAlt: string; aboutTitle: string; about: string; disciplines: readonly string[];
   venturesTitle: string; companyDescription: string; companyLink: string; soon: string;
   writingTitle: string; writingEmpty: string; contactTitle: string; contactBody: string;
+  formName: string; formEmail: string; formMessage: string; formSubmit: string;
   contactCta: string; location: string; backToTop: string;
 };
 
@@ -34,6 +35,7 @@ export const homeCopy: Record<Locale, Copy> = {
     writingTitle: "Textos & conversas.", writingEmpty: "Nada publicado por aqui ainda.",
     contactTitle: "Vamos resolver um problema?",
     contactBody: "Conte o que você está construindo e onde está a dificuldade. Vamos conversar sobre como posso ajudar.",
+    formName: "Nome", formEmail: "E-mail", formMessage: "Mensagem", formSubmit: "Enviar mensagem",
     contactCta: "Entre em contato", location: "Brasil", backToTop: "Voltar ao topo",
   },
   "en-US": {
@@ -53,6 +55,7 @@ export const homeCopy: Record<Locale, Copy> = {
     writingTitle: "Writing & talks.", writingEmpty: "Nothing published here yet.",
     contactTitle: "Have a problem worth solving?",
     contactBody: "Tell me what you're building and where it gets difficult. Let's talk about how I can help.",
+    formName: "Name", formEmail: "Email", formMessage: "Message", formSubmit: "Send message",
     contactCta: "Get in touch", location: "Brazil", backToTop: "Back to top",
   },
 };

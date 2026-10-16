@@ -57,7 +57,15 @@ export default function Profile({ locale }: { locale: Locale }) {
           </section>
           <section className={`${styles.section} ${styles.contact}`} id="contact" aria-labelledby="contact-title">
             <SectionHeading id="contact-title" number="04 /" title={t.contactTitle} />
-            <div className={styles.sectionBody}><p>{t.contactBody}</p><div className={styles.actions}><CtaLink href={links.contact} label={t.contactCta} /><a className={styles.textLink} href={links.github}>GitHub <span aria-hidden="true">↗</span></a></div></div>
+            <div className={styles.sectionBody}><p>{t.contactBody}</p><div className={styles.actions}><CtaLink href={links.contact} label={t.contactCta} /><a className={styles.textLink} href={links.github}>GitHub <span aria-hidden="true">↗</span></a></div>
+              <form id="contact-form" className={styles.form} action="https://formspree.io/f/mzezzywp" method="POST" acceptCharset="UTF-8" aria-label={t.contactCta}>
+                <label htmlFor="contact-name">{t.formName}<input id="contact-name" name="name" autoComplete="name" required /></label>
+                <label htmlFor="contact-email">{t.formEmail}<input id="contact-email" name="email" type="email" autoComplete="email" required /></label>
+                <label htmlFor="contact-message">{t.formMessage}<textarea id="contact-message" name="message" rows={6} required /></label>
+                <input className={styles.honeypot} type="text" name="_gotcha" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+                <button type="submit">{t.formSubmit} <span aria-hidden="true">→</span></button>
+              </form>
+            </div>
           </section>
         </main>
         <footer className={styles.footer}><span>Francisco Micael</span><a href="#top">{t.backToTop} <span aria-hidden="true">↑</span></a></footer>
