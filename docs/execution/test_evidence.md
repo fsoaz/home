@@ -26,3 +26,9 @@ These checks do not establish browser behavior or shader compilation. No automat
 - Added a GitHub Actions build/deploy workflow and relative Vite asset paths; adjusted the résumé link to use the configured base.
 - `npm run build` passed. Output inspection confirmed both referenced relative assets and the résumé exist in `dist/`.
 - Live deployment remains pending pushing these changes and selecting GitHub Actions as the Pages source. Browser verification is still pending.
+
+## Live deployment follow-up
+
+Live inspection confirmed `/src/main.ts` was still served despite a successful custom workflow. Changed the repository Pages build type from `legacy` to `workflow` and dispatched run 43058218521. This supersedes the earlier pending Pages configuration note.
+
+Live verification after redeployment: HTML references compiled `./assets/` files; JavaScript and CSS both return HTTP 200 with appropriate content types. Browser rendering has not been verified.

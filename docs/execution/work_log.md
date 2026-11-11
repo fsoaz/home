@@ -11,3 +11,5 @@
 - Updated project documentation. Browser QA and deployment remain outstanding.
 
 - Diagnosed blank GitHub Pages site: legacy root publishing served the uncompiled Vite entry. Added Pages build/deploy workflow, relative asset configuration, and base-aware résumé link. Production build and output asset checks passed; changes are local pending push and Pages source configuration.
+
+- Follow-up live diagnosis: the new workflow succeeded but Pages still used legacy branch publishing; live HTML referenced `/src/main.ts`. Changed repository Pages build type to `workflow` through GitHub API and dispatched deployment run 43058218521.
