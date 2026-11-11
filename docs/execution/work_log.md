@@ -9,3 +9,5 @@
 - Replaced the visible email link with a bilingual reveal button following spam concerns. Confirmed the production build passes again.
 - Documented residual exposure through client code and the downloadable résumé.
 - Updated project documentation. Browser QA and deployment remain outstanding.
+
+- Diagnosed blank GitHub Pages site: legacy root publishing served the uncompiled Vite entry. Added Pages build/deploy workflow, relative asset configuration, and base-aware résumé link. Production build and output asset checks passed; changes are local pending push and Pages source configuration.

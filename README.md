@@ -34,3 +34,9 @@ English is the default. The language preference is saved in browser local storag
 The contact address is assembled and revealed after clicking “Show email” / “Mostrar e-mail”. This discourages casual scraping; it is not access control. The address remains extractable from client code, and the public résumé includes email and phone details.
 
 The production build passed after implementation and the email reveal change. Browser rendering, shader execution, mobile behavior, and accessibility still require manual verification. See [test evidence](docs/execution/test_evidence.md) and [architecture](docs/context/architecture.md).
+
+## GitHub Pages
+
+The Pages workflow builds and deploys `dist/` on pushes to `main`, or manually through Actions. In repository **Settings → Pages → Build and deployment**, select **GitHub Actions** as the source. Do not serve the repository root directly: its entry point loads TypeScript that requires compilation.
+
+Vite uses relative asset URLs so the site works at `/home/`. The résumé link uses Vite’s base URL as well. Push the workflow and configuration changes before running the deployment.

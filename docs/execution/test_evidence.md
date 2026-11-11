@@ -19,3 +19,10 @@ These checks do not establish browser behavior or shader compilation. No automat
 - Start with reduced motion enabled and with WebGL unavailable; confirm static fallback.
 - Scroll the scene offscreen or hide the tab; verify rendering pause/resume.
 - Enable reduced motion during a session; verify animation stops.
+
+## GitHub Pages fix
+
+- GitHub API inspection confirmed Pages was serving `main` at `/` using a legacy branch build, without compiling TypeScript.
+- Added a GitHub Actions build/deploy workflow and relative Vite asset paths; adjusted the résumé link to use the configured base.
+- `npm run build` passed. Output inspection confirmed both referenced relative assets and the résumé exist in `dist/`.
+- Live deployment remains pending pushing these changes and selecting GitHub Actions as the Pages source. Browser verification is still pending.
