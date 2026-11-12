@@ -1,26 +1,242 @@
 import * as THREE from 'three';
-export function startScene(host: Element): () => void {
- const motion=matchMedia('(prefers-reduced-motion: reduce)');
- if(motion.matches)return ()=>{};
- let renderer:THREE.WebGLRenderer;
- try {renderer=new THREE.WebGLRenderer({alpha:true,antialias:false});}catch{return ()=>{};}
- renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));host.appendChild(renderer.domElement);
- const canvas=renderer.domElement;const contextLost=(event:Event)=>{event.preventDefault();canvas.remove()};canvas.addEventListener('webglcontextlost',contextLost);
- const scene=new THREE.Scene(),camera=new THREE.Camera();
- const uniforms={time:{value:0},aspect:{value:1},pointer:{value:new THREE.Vector2()}};
- const material=new THREE.ShaderMaterial({uniforms,vertexShader:'void main(){gl_Position=vec4(position,1.0);}',fragmentShader:`precision highp float;
- uniform vec2 resolution; uniform float time; uniform float aspect; uniform vec2 pointer;
- float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
- void main(){vec2 p=gl_FragCoord.xy / resolution.xy - .5;p.x*=aspect;p-=pointer*.018;p.x-=.22;float r=length(p);float a=atan(p.y,p.x);float ellipse=length(vec2(p.x,p.y*3.9));float disk=exp(-abs(ellipse-.28)*65.);float orbit=exp(-abs(r-.155)*240.);float halo=exp(-abs(r-.17)*27.)*.22;float streak=.65+.35*sin(a*18.+time*.35+sin(a*7.)*2.);vec3 color=vec3(1.,.42,.13)*(disk*streak*1.5+orbit*1.4+halo);color+=vec3(1.,.82,.55)*pow(disk,3.)*.8;if(r<.147)color*=smoothstep(.14,.15,r);vec2 grid=floor(gl_FragCoord.xy/3.);float star=step(.9994,hash(grid))*hash(grid+8.);color+=vec3(star*.5)*smoothstep(.19,.4,r);gl_FragColor=vec4(color,1.);}`});
- Object.assign(uniforms,{resolution:{value:new THREE.Vector2()}});
- const mesh=new THREE.Mesh(new THREE.PlaneGeometry(2,2),material);scene.add(mesh);
- const resize=()=>{const box=host.getBoundingClientRect();renderer.setSize(box.width,box.height);uniforms.aspect.value=box.width/box.height;(material.uniforms.resolution.value as THREE.Vector2).set(renderer.domElement.width,renderer.domElement.height)};resize();
- const observer=new ResizeObserver(resize);observer.observe(host);let visible=true;let frame=0;let disposed=false;
- const active=()=>visible&&!document.hidden&&!motion.matches&&!disposed;
- const tick=(t:number)=>{if(!active()){frame=0;return}uniforms.time.value=t/1000;renderer.render(scene,camera);frame=requestAnimationFrame(tick)};
- const sync=()=>{if(active()&&!frame)frame=requestAnimationFrame(tick);else if(!active()&&frame){cancelAnimationFrame(frame);frame=0}};
- const intersection=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;sync()});intersection.observe(host);
- const pointer=(e:PointerEvent)=>uniforms.pointer.value.set(e.clientX/innerWidth-.5,e.clientY/innerHeight-.5);window.addEventListener('pointermove',pointer);
- document.addEventListener('visibilitychange',sync);motion.addEventListener('change',sync);sync();
- return ()=>{disposed=true;cancelAnimationFrame(frame);observer.disconnect();intersection.disconnect();document.removeEventListener('visibilitychange',sync);motion.removeEventListener('change',sync);window.removeEventListener('pointermove',pointer);canvas.removeEventListener('webglcontextlost',contextLost);mesh.geometry.dispose();material.dispose();renderer.dispose();renderer.domElement.remove()};
+
+// Keep the photograph's composition while moving only its plasma and lensed light.
+const fragmentShader = `
+precision highp float;
+uniform sampler2D backdrop;
+uniform vec2 viewport;
+uniform vec2 imageSize;
+uniform vec2 imageOffset;
+uniform vec2 sourceSize;
+uniform vec2 pointer;
+uniform float time;
+varying vec2 vUv;
+
+float hash(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+float noise(vec2 p) {
+  vec2 cell = floor(p), f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(cell), hash(cell + vec2(1.0, 0.0)), f.x),
+             mix(hash(cell + vec2(0.0, 1.0)), hash(cell + 1.0), f.x), f.y);
+}
+void main() {
+  vec2 screen = vec2(vUv.x, 1.0 - vUv.y) * viewport;
+  vec2 photo = (screen - imageOffset) / imageSize;
+  if (photo.x < 0.0 || photo.x > 1.0 || photo.y < 0.0 || photo.y > 1.0) {
+    gl_FragColor = vec4(0.0);
+    return;
+  }
+
+  vec2 pixel = photo * sourceSize;
+  vec2 center = sourceSize * vec2(0.770, 0.345);
+  vec2 p = pixel - center;
+  float radius = length(p);
+  float angle = atan(p.y, p.x);
+  float horizon = sourceSize.x * 0.096;
+  float rim = exp(-pow((radius - horizon) / 24.0, 2.0));
+  float halo = exp(-pow((radius - horizon - 16.0) / 66.0, 2.0));
+  float outside = smoothstep(horizon - 22.0, horizon + 4.0, radius);
+
+  // The disk follows the diagonal in the source image, so resizing cannot detach it.
+  vec2 disk = mat2(0.952, 0.306, -0.306, 0.952) * p;
+  float stream = exp(-pow(disk.y / 38.0, 2.0));
+  stream *= exp(-pow(disk.x / 610.0, 2.0)) * outside;
+  float flow = noise(vec2(disk.x * 0.022 - time * 0.72, disk.y * 0.10));
+  float orbit = sin(angle * 11.0 - time * 1.25 + noise(p * 0.014) * 3.0);
+
+  // A small, continuous displacement makes the photographed filaments flow.
+  vec2 tangent = vec2(-p.y, p.x) / max(radius, 1.0);
+  vec2 displacement = tangent * rim * (orbit * 3.2 + sin(time * 0.43) * 1.8);
+  displacement += vec2(0.952, -0.306) * stream * (flow - 0.5) * 10.0;
+  displacement += normalize(p + vec2(0.001)) * halo * sin(angle * 7.0 - time * 0.7) * 0.9;
+  displacement += pointer * 3.5;
+  vec2 sampleUV = photo + displacement / sourceSize;
+  vec4 color = texture2D(backdrop, vec2(sampleUV.x, 1.0 - sampleUV.y));
+
+  float luminance = dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));
+  float hot = smoothstep(0.10, 0.8, luminance);
+  float filament = pow(0.5 + 0.5 * sin(angle * 17.0 - time * 1.6 + flow * 4.0), 5.0);
+  color.rgb *= 1.0 + stream * (flow - 0.44) * 0.28 + rim * orbit * 0.07;
+  color.rgb += vec3(1.0, 0.48, 0.18) * hot * (rim * filament * 0.09 + stream * flow * 0.035);
+
+  // Sparse stars breathe gently; leave the event horizon itself completely dark.
+  vec2 starCell = floor(pixel / 3.0);
+  float twinkle = sin(time * (0.5 + hash(starCell)) + hash(starCell + 5.0) * 6.283);
+  float sky = (1.0 - smoothstep(0.025, 0.22, luminance)) * (1.0 - halo) * outside;
+  color.rgb *= 1.0 + sky * twinkle * 0.14;
+  gl_FragColor = vec4(color.rgb, 1.0);
+  #include <colorspace_fragment>
+}`;
+
+export function startScene(host: HTMLElement, toggle: HTMLButtonElement): () => void {
+  const motion = matchMedia('(prefers-reduced-motion: reduce)');
+  let renderer: THREE.WebGLRenderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false, powerPreference: 'low-power' });
+  } catch {
+    return () => {};
+  }
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const canvas = renderer.domElement;
+  canvas.className = 'space-animation';
+  canvas.setAttribute('aria-hidden', 'true');
+  host.appendChild(canvas);
+
+  let disposed = false;
+  let ready = false;
+  let visible = true;
+  let contextLost = false;
+  let paused = false;
+  let frame = 0;
+  let previousTime = 0;
+  let lastRender = 0;
+  const targetPointer = new THREE.Vector2();
+  const uniforms = {
+    backdrop: { value: null as THREE.Texture | null },
+    viewport: { value: new THREE.Vector2(1, 1) },
+    imageSize: { value: new THREE.Vector2(1, 1) },
+    imageOffset: { value: new THREE.Vector2() },
+    sourceSize: { value: new THREE.Vector2(1672, 941) },
+    pointer: { value: new THREE.Vector2() },
+    time: { value: 0 },
+  };
+  const scene = new THREE.Scene();
+  const camera = new THREE.Camera();
+  const material = new THREE.ShaderMaterial({
+    uniforms,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = position.xy * 0.5 + 0.5; gl_Position = vec4(position, 1.0); }',
+    fragmentShader,
+  });
+  const geometry = new THREE.PlaneGeometry(2, 2);
+  scene.add(new THREE.Mesh(geometry, material));
+
+  const resize = () => {
+    if (disposed) return;
+    const { width, height } = host.getBoundingClientRect();
+    if (!width || !height) return;
+    // Bound both DPR and total pixels, including tall mobile project layouts.
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.35, Math.sqrt(2_000_000 / (width * height))));
+    renderer.setSize(width, height, false);
+    uniforms.viewport.value.set(width, height);
+    const style = getComputedStyle(host);
+    const source = uniforms.sourceSize.value;
+    const size = style.backgroundSize.split(' ');
+    let imageWidth: number;
+    let imageHeight: number;
+    if (size[0] === 'cover') {
+      const scale = Math.max(width / source.x, height / source.y);
+      imageWidth = source.x * scale;
+      imageHeight = source.y * scale;
+    } else {
+      // The mobile design uses auto width and a fixed 810px image height.
+      imageHeight = parseFloat(size[1]) || height;
+      imageWidth = imageHeight * source.x / source.y;
+    }
+    const offset = (value: string, available: number) => value.endsWith('%')
+      ? available * parseFloat(value) / 100 : parseFloat(value) || 0;
+    uniforms.imageSize.value.set(imageWidth, imageHeight);
+    uniforms.imageOffset.value.set(
+      offset(style.backgroundPositionX, width - imageWidth),
+      offset(style.backgroundPositionY, height - imageHeight),
+    );
+  };
+
+  const active = () => ready && visible && !document.hidden && !motion.matches && !paused && !contextLost && !disposed;
+  const tick = (now: number) => {
+    frame = 0;
+    if (!active()) { sync(); return; }
+    frame = requestAnimationFrame(tick);
+    if (now - lastRender < 1000 / 30) return;
+    const elapsed = previousTime ? Math.min((now - previousTime) / 1000, 0.1) : 0;
+    previousTime = now;
+    lastRender = now;
+    uniforms.time.value += elapsed;
+    uniforms.pointer.value.lerp(targetPointer, 1 - Math.exp(-elapsed * 3));
+    renderer.render(scene, camera);
+    host.classList.add('animation-ready');
+  };
+  const sync = () => {
+    if (disposed) return;
+    canvas.hidden = motion.matches || contextLost;
+    toggle.hidden = !ready || motion.matches || contextLost;
+    toggle.setAttribute('aria-pressed', String(paused));
+    toggle.textContent = (paused ? toggle.dataset.playLabel : toggle.dataset.pauseLabel) || '';
+    if (motion.matches || contextLost) host.classList.remove('animation-ready');
+    if (active() && !frame) {
+      previousTime = 0;
+      lastRender = 0;
+      frame = requestAnimationFrame(tick);
+    } else if (!active() && frame) {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      previousTime = 0;
+    }
+  };
+
+  const texture = new THREE.TextureLoader().load(`${import.meta.env.BASE_URL}event-horizon.webp`, loaded => {
+    if (disposed) { loaded.dispose(); return; }
+    uniforms.sourceSize.value.set(loaded.image.width, loaded.image.height);
+    ready = true;
+    resize();
+    sync();
+  }, undefined, () => { ready = false; sync(); });
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearFilter;
+  texture.generateMipmaps = false;
+  uniforms.backdrop.value = texture;
+
+  const lost = (event: Event) => {
+    event.preventDefault();
+    contextLost = true;
+    sync();
+  };
+  const restored = () => { contextLost = false; sync(); };
+  const pointer = (event: PointerEvent) => {
+    if (event.pointerType !== 'mouse' || !active()) return;
+    const bounds = host.getBoundingClientRect();
+    targetPointer.set((event.clientX - bounds.left) / bounds.width - 0.5, (event.clientY - bounds.top) / bounds.height - 0.5);
+  };
+  const resetPointer = () => targetPointer.set(0, 0);
+  const togglePaused = () => { paused = !paused; sync(); };
+  const observer = new ResizeObserver(resize);
+  observer.observe(host);
+  const intersection = new IntersectionObserver(entries => {
+    visible = entries.some(entry => entry.isIntersecting);
+    sync();
+  });
+  intersection.observe(host);
+  const opening = host.parentElement!;
+  opening.addEventListener('pointermove', pointer);
+  opening.addEventListener('pointerleave', resetPointer);
+  toggle.addEventListener('click', togglePaused);
+  canvas.addEventListener('webglcontextlost', lost);
+  canvas.addEventListener('webglcontextrestored', restored);
+  document.addEventListener('visibilitychange', sync);
+  motion.addEventListener('change', sync);
+  resize();
+
+  return () => {
+    disposed = true;
+    cancelAnimationFrame(frame);
+    observer.disconnect();
+    intersection.disconnect();
+    opening.removeEventListener('pointermove', pointer);
+    opening.removeEventListener('pointerleave', resetPointer);
+    toggle.removeEventListener('click', togglePaused);
+    canvas.removeEventListener('webglcontextlost', lost);
+    canvas.removeEventListener('webglcontextrestored', restored);
+    document.removeEventListener('visibilitychange', sync);
+    motion.removeEventListener('change', sync);
+    geometry.dispose();
+    material.dispose();
+    texture.dispose();
+    renderer.dispose();
+    canvas.remove();
+    host.classList.remove('animation-ready');
+  };
 }

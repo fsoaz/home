@@ -9,8 +9,9 @@ if (!assets.some((asset) => asset.endsWith('.js')) || !assets.some((asset) => as
 }
 for (const asset of assets) await access(resolve(dist, asset));
 await access(resolve(dist, 'francisco-soares-cv.pdf'));
+await access(resolve(dist, 'event-horizon.webp'));
 const source = (await Promise.all(['src/main.ts', 'src/views.ts'].map((path) => readFile(resolve(path), 'utf8')))).join('\n');
-for (const anchor of ['work', 'about', 'contact']) {
+for (const anchor of ['work', 'expertise', 'about', 'contact']) {
   if (!source.includes(`id="${anchor}"`)) throw new Error(`Missing internal anchor: #${anchor}`);
 }
 for (const destination of ['https://github.com/fsoaz', 'https://www.linkedin.com/in/francisco-soares-b89299427/']) {

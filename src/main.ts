@@ -18,9 +18,10 @@ function render(): void {
   document.querySelector('meta[name="description"]')?.setAttribute('content', content.intro);
   document.querySelector<HTMLDivElement>('#app')!.innerHTML = [
     renderHeader(content, language),
-    '<main>',
+    '<main><div class="opening"><div id="space" aria-hidden="true"></div>',
     renderHero(content),
     renderWork(content, language),
+    '</div>',
     renderAbout(content, language),
     renderContact(content, language),
     '</main>',
@@ -44,11 +45,20 @@ function render(): void {
     link.focus();
   });
 
-  const host = document.querySelector('#space')!;
+  const host = document.querySelector<HTMLElement>('#space')!;
+  const toggle = document.querySelector<HTMLButtonElement>('#motion-toggle')!;
   let cancelled = false;
   stopScene = () => { cancelled = true; };
   import('./scene').then(({ startScene }) => {
-    if (!cancelled && host.isConnected) stopScene = startScene(host);
+    if (!cancelled && host.isConnected) stopScene = startScene(host, toggle);
+  }).catch(() => { /* The static backdrop remains available. */ });
+
+  document.querySelector('#all-projects')!.addEventListener('click', (event) => {
+    const button = event.currentTarget as HTMLButtonElement;
+    const expanded = button.getAttribute('aria-expanded') !== 'true';
+    button.setAttribute('aria-expanded', String(expanded));
+    document.querySelector<HTMLElement>('#more-projects')!.hidden = !expanded;
+    button.innerHTML = `${language === 'en' ? (expanded ? 'Show selected projects' : 'View all projects') : (expanded ? 'Mostrar destaques' : 'Ver todos os projetos')} <span aria-hidden="true">${expanded ? '−' : '↗'}</span>`;
   });
 }
 
