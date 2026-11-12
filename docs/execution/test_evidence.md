@@ -1,46 +1,64 @@
 # Test evidence
 
-## Completed checks
+The results below were recorded during the implementation, redesign, and animation tasks. The documentation update reviewed them against the current source; it did not rerun application checks or inspect current production state.
 
-- `npm run build` passed after the initial implementation and subsequent application changes. It runs TypeScript validation and Vite production bundling.
-- `npm run smoke:dist` passed after the asset validation script was added and after the content/view modules were extracted. It checks built JS/CSS asset delivery, résumé presence, internal section anchors, and configured external destinations.
-- The production build emits a small main bundle and a separate Three.js scene chunk. This confirms code splitting in the build output, not runtime loading or performance gains on a device.
-- Source review confirmed language switching retains the session preference if local storage access throws, and restores focus to the language button after rerender.
+## Build and source checks — passed
 
-## Manual browser acceptance — pending
+- `npm run build`: strict TypeScript validation and Vite production bundling passed after the redesign and animation changes.
+- `npm run smoke:dist`: generated JavaScript/CSS references, résumé/background presence, internal anchors (`work`, `expertise`, `about`, `contact`), and configured GitHub/LinkedIn destination strings passed.
+- Build output contains a separate dynamically imported Three.js scene chunk. This confirms code splitting, not measured performance gains on a device.
+- `git diff --check` passed after the application changes.
+- Source review confirmed guarded language storage, language-button focus restoration, cancellation of stale scene imports, and disposal of graphics resources, observers, and listeners on rerender.
 
-- Open the dev server and production preview; check browser console and shader rendering/fallback.
-- Check widths 320, 375, 768, 1024, and 1440px, short-height layouts, 200% text zoom, content readability, and horizontal overflow.
-- Switch English/Portuguese, reload, and confirm persistence, metadata, and labels.
-- Navigate by keyboard, use the skip link, and expand project notes.
-- Reveal email in both languages; verify link focus and mailto destination.
-- Download the résumé and verify its contents; check GitHub and LinkedIn destinations.
-- Start with reduced motion enabled and with WebGL unavailable; confirm static fallback.
-- Scroll the scene offscreen or hide the tab; verify rendering pause/resume.
-- Enable reduced motion during a session; verify animation stops.
-- Profile mobile loading with JavaScript CPU throttling and reduced bandwidth before changing font or scene delivery further.
+The smoke script checks local file presence and source strings. It does not make HTTP requests to external profiles or exercise browser controls.
 
-## GitHub Pages deployment
+## Mockup redesign — Chromium checks passed
 
-GitHub Pages was found serving the uncompiled Vite entry through legacy branch publishing. A GitHub Actions build/deploy workflow, relative asset paths, and base-aware résumé URL were added. Pages was switched to workflow publishing and workflow run 43058218521 was dispatched. Live verification after redeployment confirmed compiled relative HTML asset paths and HTTP 200 responses with appropriate content types for JavaScript and CSS. Browser rendering has not been verified. The current local smoke check runs in the Pages workflow after `npm run build`.
+One-off local browser checks used a temporary Vite development server:
 
-## Mockup redesign — November 2026
+- A 1672 × 941 desktop screenshot was visually compared with the supplied mockup.
+- Portuguese layouts at widths 320, 390, 768, and 1024px had no horizontal overflow. English mobile rendering and the mobile project section were also visually reviewed.
+- Native project details opened. “View all projects” revealed Support Copilot.
+- Language switching updated document language and persisted across reloads.
+- Email reveal produced a visible mailto link.
+- No page runtime errors occurred during those interaction checks.
 
-- `npm run build`: TypeScript checking and Vite production build pass.
-- `npm run smoke:dist`: JavaScript, CSS, résumé, space background, navigation anchors, and external destinations verified.
-- Chromium desktop screenshot at 1672 × 941 visually reviewed against the supplied mockup.
-- Chromium layouts at 320, 390, 768, and 1024 px in Portuguese: no horizontal overflow. English mobile rendering and the mobile project section also visually reviewed.
-- Browser interactions passed: native project details open, “View all projects” reveals Support Copilot, language toggle changes the document language and persists on reload, and email reveal creates a working mailto link.
-- No browser page errors during those checks. Browser QA used a temporary local Vite server; no deployment was performed.
-- Full-page Chromium capture omitted some offscreen blurred cards; a separate viewport capture confirmed all three cards render correctly when scrolled into view.
+A full-page Chromium capture omitted some offscreen blurred cards. A separate viewport capture confirmed all three cards rendered correctly when scrolled into view. This capture limitation is not a missing-card result.
 
-## Black hole animation enhancement — November 2026
+## Black hole enhancement — Chromium checks passed
 
-- Replaced the unused procedural scene with a photo-based WebGL shader: flowing disk filaments, moving rim highlights, subtle star shimmer, and eased pointer parallax. The source image and CSS crop remain aligned on desktop and mobile.
-- Chromium screenshot comparisons confirm running frames change and paused frames remain identical.
-- Initial and live reduced-motion preferences show the static backdrop and hide animation controls. A frame-level inactive check handles preference changes before media-query events settle.
-- Instrumented WebGL draw calls stop while the opening is offscreen and resume on return.
-- Language switching releases the old scene, leaves one canvas, and translates pause/resume labels.
-- Mobile rendering checked at 390 × 844; no horizontal overflow. Desktop checked at 1672 × 941.
-- WebGL context loss reveals the static background; restoration resumes rendering. A browser launched with WebGL disabled retains the working static page without animation controls.
-- No shader or page runtime errors in these checks. `npm run build`, `npm run smoke:dist`, and `git diff --check` pass.
+- Running-frame screenshot comparisons changed; paused-frame comparisons remained identical.
+- Initial and live reduced-motion preferences showed the static backdrop and hid animation controls. Returning to normal motion resumed animation.
+- Instrumented WebGL draw calls stopped while the opening was offscreen and resumed on return.
+- Language switching left one canvas and translated pause/resume labels.
+- Animated desktop rendering was checked at 1672 × 941 and Portuguese mobile rendering at 390 × 844, with no mobile horizontal overflow.
+- WebGL context loss revealed the static backdrop and hid the control. Restoration resumed animation.
+- A browser launched with WebGL disabled retained the static page without animation controls.
+- No shader compilation or page runtime errors occurred in the successful animation checks.
+
+These were temporary browser scripts, not a committed automated suite. Frame changes demonstrate motion; they do not measure sustained frame rate, GPU cost, or battery usage. The document-hidden scheduling path is implemented but was not separately exercised by these tests.
+
+## Remaining acceptance and profiling
+
+- Full keyboard flow, skip link, focus visibility, disclosure controls, animation control, and screen reader behavior.
+- Short-height layouts, 200% text zoom, and readability beyond the sampled viewport sizes.
+- Firefox, Safari, and physical mobile devices.
+- Hidden-tab pause/resume, distinct from the completed offscreen test.
+- Actual résumé download and content review; following the GitHub/LinkedIn destinations. Local file/destination checks have passed, but those end-to-end actions were not recorded.
+- Rapid language changes during texture/module loading and detailed graphics-resource profiling beyond the single-canvas check and source review.
+- Mobile loading with constrained bandwidth and CPU/GPU resources; font delivery costs and sustained animation performance.
+- Browser rendering of the latest build at the deployed Pages path.
+
+Use the procedure in [testing guidance](../standards/testing.md) when repeating checks. Record actual browser, viewport, and outcomes; do not infer coverage from source inspection alone.
+
+## Historical GitHub Pages deployment
+
+Before the mockup redesign, Pages was found serving the uncompiled Vite entry through legacy branch publishing. A GitHub Actions build/deploy workflow, relative asset paths, and base-aware résumé URL were added. Pages was switched to workflow publishing and workflow run `43058218521` was dispatched.
+
+The earlier record reports compiled relative HTML asset paths and HTTP 200 responses with appropriate content types for JavaScript and CSS after redeployment. That verifies asset delivery for that deployment; it does not verify current production content or browser rendering of the later redesign/animation.
+
+The redesign and animation tasks performed local verification and did not deploy. The Pages workflow currently runs `npm run build` and `npm run smoke:dist` before uploading `dist/`.
+
+## Documentation update
+
+Reviewed README and documentation against application source, package scripts, asset files, and the Pages workflow. Validated local Markdown links and ran `git diff --check`. No application changes, application test reruns, or deployments were part of this update.

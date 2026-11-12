@@ -1,11 +1,20 @@
 # Review notes
 
-Production build and distribution smoke checks pass. Runtime appearance, browser interactions, WebGL shader behavior, and mobile loading performance remain unverified; do not describe them as tested.
+## Verified behavior
 
-The scene is dynamically loaded into a separate chunk, and its animation loop is scheduled only while visible, active, and not reduced-motion. The CSS fallback remains visible if WebGL cannot initialize or its context is lost. Browser validation is still needed to confirm these behaviors in target browsers.
+The mockup redesign and enhanced black hole animation passed local TypeScript/build and distribution smoke checks. One-off Chromium checks covered desktop/mobile appearance, bilingual interactions, project disclosure, all-project visibility, email reveal, changing/frozen animation frames, initial/live reduced motion, offscreen scheduling, and WebGL fallback/recovery. Language switching leaves one scene canvas and translates the animation control. Exact coverage is in [test evidence](test_evidence.md).
 
-The email reveal change reduces casual harvesting but does not hide the address from determined bots. The publicly downloadable résumé still contains email and phone details. No contact backend or anti-spam service is present.
+The scene is dynamically loaded. Rendering targets 30fps with capped drawing resolution and runs only while visible, active, motion-enabled, and unpaused. The static image remains available when animation cannot run. These implementation limits do not establish measured loading, battery, or sustained-frame-rate results on users' devices.
 
-Project results are résumé-reported claims with evaluation context, not independent measurements. Direct project destinations are omitted until verified.
+## Remaining limitations
 
-Google Fonts still requires a third-party request; system fonts provide a fallback. No font-loading changes were made because browser profiling has not identified a bottleneck.
+- Broader browser/device coverage, full keyboard/assistive technology acceptance, text zoom, short-height layouts, hidden-tab behavior, and constrained-device performance remain unverified.
+- The browser checks were temporary local scripts; there is no committed automated browser suite.
+- Manual animation pause, expanded projects, and revealed email reset when language changes rebuild the page. Only language preference is saved in local storage.
+- Google Fonts requires third-party requests; system fonts provide a fallback. Font delivery has not been changed based on profiling.
+- Email reveal does not hide the address from determined bots. The downloadable résumé contains email and phone details. No contact backend or anti-spam service exists.
+- Project metrics are résumé-reported claims with evaluation context. Direct project destinations remain omitted until supplied and verified.
+
+## Deployment evidence
+
+The repository has a GitHub Pages build/deploy workflow and a historical record of successful compiled asset delivery. The redesign/animation tasks performed local verification without deploying. Current production content was not checked for this documentation update.

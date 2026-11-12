@@ -1,7 +1,9 @@
 # Current task
 
-Implement the portfolio review roadmap through Phase 4 and update project documentation to reflect the implemented behavior and verification status.
+Update project documentation after the mockup redesign and black hole animation enhancement.
 
-Status: complete. Phase 1–4 code changes and documentation updates are complete. `npm run build` and `npm run smoke:dist` pass.
+Status: complete. The README, product/architecture descriptions, asset notes, roadmap, review notes, testing guidance, and work log reflect the current implementation. Test evidence separates completed local checks, historical deployment checks, and outstanding acceptance work.
 
-Pending follow-up: manual browser acceptance and mobile performance profiling listed in `test_evidence.md`. Public hosting follow-up still requires résumé privacy and content review.
+Documentation validation: reviewed descriptions against source files, package scripts, and the Pages workflow; checked local Markdown links and `git diff --check`. No application code changed or application tests reran for this documentation-only task.
+
+Follow-up: remaining accessibility, device/browser, hidden-tab, download/navigation, and performance checks are listed in [test evidence](test_evidence.md). Current production state was not rechecked, and this task did not deploy changes.
