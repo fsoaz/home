@@ -2,14 +2,10 @@
 
 ## 2026-11-11
 
-- Planned a bilingual, space-themed portfolio for backend and applied AI hiring teams using the supplied résumé.
-- Implemented the local Vite/TypeScript/Three.js application, project details, career sections, and résumé download.
-- Added shader animation, responsive styling, reduced-motion initialization fallback, and visibility-aware rendering.
-- Confirmed the initial production build passes.
-- Replaced the visible email link with a bilingual reveal button following spam concerns. Confirmed the production build passes again.
-- Documented residual exposure through client code and the downloadable résumé.
-- Updated project documentation. Browser QA and deployment remain outstanding.
-
-- Diagnosed blank GitHub Pages site: legacy root publishing served the uncompiled Vite entry. Added Pages build/deploy workflow, relative asset configuration, and base-aware résumé link. Production build and output asset checks passed; changes are local pending push and Pages source configuration.
-
-- Follow-up live diagnosis: the new workflow succeeded but Pages still used legacy branch publishing; live HTML referenced `/src/main.ts`. Changed repository Pages build type to `workflow` through GitHub API and dispatched deployment run 43058218521.
+- Planned and implemented a bilingual space-themed portfolio with project and career content, résumé download, shader animation, and email reveal.
+- Added Phase 1 usability and consistency changes: mobile navigation visibility, improved metadata contrast, expandable project indicators, Portuguese résumé labels, guarded local storage, and CSS variables.
+- Added Phase 2 reliability changes: language-switch focus restoration, a persistent CSS visual fallback for unavailable/lost WebGL, and production artifact/link smoke checks integrated into GitHub Pages CI.
+- Added Phase 3 refinements: dynamically loaded scene chunk, animation scheduling tied to visibility/document/reduced-motion state, and responsive rules for short and narrow viewports. Font loading was left unchanged pending browser profiling.
+- Added Phase 4 structure: moved bilingual copy and project records into `src/content.ts`, and extracted page section rendering into `src/views.ts`.
+- `npm run build` and `npm run smoke:dist` passed after the changes. Browser visual, interaction, and performance verification remains pending.
+- Diagnosed and corrected GitHub Pages publishing configuration. Live asset delivery was verified by HTTP response checks; browser rendering remains unverified.

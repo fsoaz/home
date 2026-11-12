@@ -1,17 +1,16 @@
 # Test evidence
 
-## Completed
+## Completed checks
 
-- `npm run build` passed after the initial implementation.
-- `npm run build` passed after the email reveal change: TypeScript validation and Vite production bundling succeeded.
-- Source inspection confirmed the page initially uses a reveal button rather than a visible address or mailto link.
+- `npm run build` passed after the initial implementation and subsequent application changes. It runs TypeScript validation and Vite production bundling.
+- `npm run smoke:dist` passed after the asset validation script was added and after the content/view modules were extracted. It checks built JS/CSS asset delivery, résumé presence, internal section anchors, and configured external destinations.
+- The production build emits a small main bundle and a separate Three.js scene chunk. This confirms code splitting in the build output, not runtime loading or performance gains on a device.
+- Source review confirmed language switching retains the session preference if local storage access throws, and restores focus to the language button after rerender.
 
-These checks do not establish browser behavior or shader compilation. No automated browser tests or manual visual QA have been completed. Documentation-only updates did not require another build.
+## Manual browser acceptance — pending
 
-## Manual acceptance checklist — pending
-
-- Open the dev server and production preview; check browser console and black hole rendering.
-- Check narrow and wide layouts, content readability, and horizontal overflow.
+- Open the dev server and production preview; check browser console and shader rendering/fallback.
+- Check widths 320, 375, 768, 1024, and 1440px, short-height layouts, 200% text zoom, content readability, and horizontal overflow.
 - Switch English/Portuguese, reload, and confirm persistence, metadata, and labels.
 - Navigate by keyboard, use the skip link, and expand project notes.
 - Reveal email in both languages; verify link focus and mailto destination.
@@ -19,16 +18,8 @@ These checks do not establish browser behavior or shader compilation. No automat
 - Start with reduced motion enabled and with WebGL unavailable; confirm static fallback.
 - Scroll the scene offscreen or hide the tab; verify rendering pause/resume.
 - Enable reduced motion during a session; verify animation stops.
+- Profile mobile loading with JavaScript CPU throttling and reduced bandwidth before changing font or scene delivery further.
 
-## GitHub Pages fix
+## GitHub Pages deployment
 
-- GitHub API inspection confirmed Pages was serving `main` at `/` using a legacy branch build, without compiling TypeScript.
-- Added a GitHub Actions build/deploy workflow and relative Vite asset paths; adjusted the résumé link to use the configured base.
-- `npm run build` passed. Output inspection confirmed both referenced relative assets and the résumé exist in `dist/`.
-- Live deployment remains pending pushing these changes and selecting GitHub Actions as the Pages source. Browser verification is still pending.
-
-## Live deployment follow-up
-
-Live inspection confirmed `/src/main.ts` was still served despite a successful custom workflow. Changed the repository Pages build type from `legacy` to `workflow` and dispatched run 43058218521. This supersedes the earlier pending Pages configuration note.
-
-Live verification after redeployment: HTML references compiled `./assets/` files; JavaScript and CSS both return HTTP 200 with appropriate content types. Browser rendering has not been verified.
+GitHub Pages was found serving the uncompiled Vite entry through legacy branch publishing. A GitHub Actions build/deploy workflow, relative asset paths, and base-aware résumé URL were added. Pages was switched to workflow publishing and workflow run 43058218521 was dispatched. Live verification after redeployment confirmed compiled relative HTML asset paths and HTTP 200 responses with appropriate content types for JavaScript and CSS. Browser rendering has not been verified. The current local smoke check runs in the Pages workflow after `npm run build`.

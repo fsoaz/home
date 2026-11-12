@@ -5,6 +5,7 @@ export function startScene(host: Element): () => void {
  let renderer:THREE.WebGLRenderer;
  try {renderer=new THREE.WebGLRenderer({alpha:true,antialias:false});}catch{return ()=>{};}
  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));host.appendChild(renderer.domElement);
+ const canvas=renderer.domElement;const contextLost=(event:Event)=>{event.preventDefault();canvas.remove()};canvas.addEventListener('webglcontextlost',contextLost);
  const scene=new THREE.Scene(),camera=new THREE.Camera();
  const uniforms={time:{value:0},aspect:{value:1},pointer:{value:new THREE.Vector2()}};
  const material=new THREE.ShaderMaterial({uniforms,vertexShader:'void main(){gl_Position=vec4(position,1.0);}',fragmentShader:`precision highp float;
@@ -14,8 +15,12 @@ export function startScene(host: Element): () => void {
  Object.assign(uniforms,{resolution:{value:new THREE.Vector2()}});
  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(2,2),material);scene.add(mesh);
  const resize=()=>{const box=host.getBoundingClientRect();renderer.setSize(box.width,box.height);uniforms.aspect.value=box.width/box.height;(material.uniforms.resolution.value as THREE.Vector2).set(renderer.domElement.width,renderer.domElement.height)};resize();
- const observer=new ResizeObserver(resize);observer.observe(host);let visible=true;const intersection=new IntersectionObserver(entries=>visible=entries[0].isIntersecting);intersection.observe(host);
+ const observer=new ResizeObserver(resize);observer.observe(host);let visible=true;let frame=0;let disposed=false;
+ const active=()=>visible&&!document.hidden&&!motion.matches&&!disposed;
+ const tick=(t:number)=>{if(!active()){frame=0;return}uniforms.time.value=t/1000;renderer.render(scene,camera);frame=requestAnimationFrame(tick)};
+ const sync=()=>{if(active()&&!frame)frame=requestAnimationFrame(tick);else if(!active()&&frame){cancelAnimationFrame(frame);frame=0}};
+ const intersection=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;sync()});intersection.observe(host);
  const pointer=(e:PointerEvent)=>uniforms.pointer.value.set(e.clientX/innerWidth-.5,e.clientY/innerHeight-.5);window.addEventListener('pointermove',pointer);
- let frame=0;const tick=(t:number)=>{frame=requestAnimationFrame(tick);if(visible&&!document.hidden&&!motion.matches){uniforms.time.value=t/1000;renderer.render(scene,camera)}};frame=requestAnimationFrame(tick);
- return ()=>{cancelAnimationFrame(frame);observer.disconnect();intersection.disconnect();window.removeEventListener('pointermove',pointer);mesh.geometry.dispose();material.dispose();renderer.dispose();renderer.domElement.remove()};
+ document.addEventListener('visibilitychange',sync);motion.addEventListener('change',sync);sync();
+ return ()=>{disposed=true;cancelAnimationFrame(frame);observer.disconnect();intersection.disconnect();document.removeEventListener('visibilitychange',sync);motion.removeEventListener('change',sync);window.removeEventListener('pointermove',pointer);canvas.removeEventListener('webglcontextlost',contextLost);mesh.geometry.dispose();material.dispose();renderer.dispose();renderer.domElement.remove()};
 }
